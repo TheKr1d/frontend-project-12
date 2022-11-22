@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/TheKr1d/frontend-project-12#readme",
   "dependencies": {
-    "@hexlet/chat-server": "^1.1.6"
+    "@hexlet/chat-server": "^1.1.6",
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.1",
+    "sort-by": "^1.2.0"
   }
 }
