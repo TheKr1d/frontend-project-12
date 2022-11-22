@@ -1,4 +1,4 @@
-import React, { loader as rootLoader } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
@@ -15,13 +15,11 @@ const router = createBrowserRouter([
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
-    loader: rootLoader,
   },
   {
     path: "login",
     element: <Login />,
     errorElement: <ErrorPage />,
-    loader: rootLoader,
   },
 ]);
 
