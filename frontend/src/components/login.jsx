@@ -1,16 +1,14 @@
 import { Formik, useFormik } from "formik";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { Form, Button } from 'react-bootstrap';
 import * as Yup from "yup";
 import axios from 'axios';
 import routes from '../path/path.js';
 import { useNavigate, Link } from "react-router-dom";
-import AuthContext from "../contexts/index.jsx";
 
 export default function Login() {
   const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
-  const { logIn } = useContext(AuthContext);
   const schema = Yup.object({
     login: Yup.string().max(15, 'Максимум 15 символов'),
     password: Yup.string().min(5, 'Минимум из 5 символов'),
@@ -27,8 +25,7 @@ export default function Login() {
         const responce = axios.post(routes.loginPath(), logAndPass);
         responce.then(({data}) => {
           const localStorage = window.localStorage;
-          localStorage.setItem('userId', data.token);
-          logIn();
+          localStorage.setItem('userId', JSON.stringify(data));
           setIsError(false);
           navigate('/');
         })
@@ -107,7 +104,7 @@ export default function Login() {
                   <div className="card-footer p-4">
                     <div className="text-center">
                       <span>Нет аккаунта?</span>{" "}
-                      <a href="/signup">Регистрация</a>
+                      <a href="/">Регистрация</a>
                     </div>
                   </div>
                 </div>

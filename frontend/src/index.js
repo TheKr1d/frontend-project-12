@@ -1,50 +1,16 @@
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import React from "react";
-import ReactDOM from "react-dom/client";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import "./index.css";
-import Root from "./routes/root";
-import ErrorPage from "./routes/error-page";
-import Login from "./routes/login";
-import AuthContext from "./contexts/index.jsx";
-import { useState } from "react";
+import App from "./components/app";
+import { Provider } from "react-redux";
+import store from "./redux/store.js";
 
-const AuthProvider = ({children}) => {
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  const logIn = () => setLoggedIn(true);
-  const logOut = () => {
-    localStorage.removeItem('userId');
-    setLoggedIn(false);
-  };
-
-  return (
-    <AuthContext.Provider value={{ loggedIn, logIn, logOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Root />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: "login",
-    element: <Login />,
-    errorElement: <ErrorPage />,
-  },
-]);
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const container = document.getElementById("root");
+const root = createRoot(container);
 root.render(
-  <React.StrictMode>
-    <AuthProvider >
-      <RouterProvider router={router}/>
-    </AuthProvider>
-  </React.StrictMode>
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
 );
