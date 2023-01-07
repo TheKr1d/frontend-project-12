@@ -1,24 +1,30 @@
 import { Formik, useFormik } from "formik";
 import Group from "./renderGroup.jsx";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import React from "react";
 import { getChannelsAsync } from "../redux/asyncThunk.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { addMessage } from "../redux/messages.js";
 
 export default function Root() {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(getChannelsAsync())
+    dispatch(getChannelsAsync());
   }, [dispatch])
 
-  const data = useSelector((state) => state.channels);
-  const channels = Object.values(data.entities);
-
+  const {activeId, entities} = useSelector((state) => state.channels);
+  const channels = Object.values(entities);
+  const messages = useSelector((state) => state.messages);
+  const messagesList = Object.values(messages.entities);
 
   const formik = useFormik({
     initialValues: {
       value: "",
+    },
+    onSubmit: ({value}) => {
+      dispatch(addMessage(value));
+      formik.values.value = '';
     },
   });
   return (
@@ -60,7 +66,7 @@ export default function Root() {
                   </div>
                   <ul className="nav flex-column nav-pills nav-fill px-2">
                     {channels.map((channel) => {
-                      return <Group value={channel} key={channel.id} />;
+                      return <Group value={{channel, activeId}} key={channel.id} />;
                     })}
                   </ul>
                 </div>
@@ -75,22 +81,29 @@ export default function Root() {
                     <div
                       id="messages-box"
                       className="chat-messages overflow-auto px-5"
-                    ></div>
-                    <Formik>
+                    >
+                      {messagesList.map(({author, text, id}) => {
+                        return (
+                          <div key={id}>
+                            <b>{author}</b>: {text}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <Formik >
                       <div className="mt-auto px-5 py-3">
-                        <form noValidate="" className="py-1 border rounded-2">
+                        <Form onSubmit={formik.handleSubmit} className="py-1 border rounded-2">
                           <div className="input-group has-validation">
                             <input
-                              name="body"
+                              name="value"
                               aria-label="Новое сообщение"
                               placeholder="Введите сообщение..."
                               className="border-0 p-0 ps-2 form-control"
-                              value={formik.value}
+                              value={formik.values.value}
                               onChange={formik.handleChange}
                             />
                             <Button
                               type="submit"
-                              disabled=""
                               className="btn btn-group-vertical"
                             >
                               <svg
@@ -108,7 +121,7 @@ export default function Root() {
                               <span className="visually-hidden">Отправить</span>
                             </Button>
                           </div>
-                        </form>
+                        </Form>
                       </div>
                     </Formik>
                   </div>

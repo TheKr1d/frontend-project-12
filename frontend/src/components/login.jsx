@@ -6,9 +6,11 @@ import axios from 'axios';
 import routes from '../path/path.js';
 import { useNavigate, Link } from "react-router-dom";
 
+
 export default function Login() {
   const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
+
   const schema = Yup.object({
     login: Yup.string().max(15, 'Максимум 15 символов'),
     password: Yup.string().min(5, 'Минимум из 5 символов'),
