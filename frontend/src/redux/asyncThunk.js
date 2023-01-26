@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, createEntityAdapter } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import routes, { getAuthHeader } from "../path/path";
 
@@ -11,8 +11,7 @@ export const getChannelsAsync = createAsyncThunk("channels/getChannels", async (
     } catch (e) {}
 });
 
-const adapter = createEntityAdapter();
-const initialState = adapter.getInitialState({loadingState: 'idle', error: null});
+const initialState = {loadingState: 'idle', error: null};
 
 const slice = createSlice({
   name: "asyncThunk",

@@ -7,11 +7,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addMessage } from "../redux/messages.js";
 
-export default function Root() {
+export default function Root({value}) {
   const dispatch = useDispatch();
+  const {socket} = value;
   useEffect(() => {
     dispatch(getChannelsAsync());
-  }, [dispatch])
+    socket.onAny((eventName, arg) => {
+    dispatch(addMessage(arg));
+  })
+  }, [dispatch, socket])
 
   const {activeId, entities} = useSelector((state) => state.channels);
   const channels = Object.values(entities);
@@ -23,7 +27,8 @@ export default function Root() {
       value: "",
     },
     onSubmit: ({value}) => {
-      dispatch(addMessage(value));
+      const {username} = JSON.parse(window.localStorage.getItem('userId'));
+      socket.emit('newMessage', {entities: {message: value, chatName: 'general', author: username}});
       formik.values.value = '';
     },
   });
@@ -82,10 +87,11 @@ export default function Root() {
                       id="messages-box"
                       className="chat-messages overflow-auto px-5"
                     >
-                      {messagesList.map(({author, text, id}) => {
+                      {messagesList.map(({entities}, id) => {
+                        const {author, message} = entities;
                         return (
                           <div key={id}>
-                            <b>{author}</b>: {text}
+                            <b>{author}</b>: {message}
                           </div>
                         )
                       })}

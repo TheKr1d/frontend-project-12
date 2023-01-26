@@ -5,10 +5,11 @@ import "../index.css";
 import Root from "./root.jsx";
 import Login from "./login.jsx";
 import ErrorPage from "./error-page.jsx";
+import { io } from "socket.io-client";
 import * as _ from 'lodash';
 
 
-const PrivetRoute = ({ children }) => {
+const PrivatRoute = ({ children }) => {
   const local = JSON.parse(window.localStorage.getItem("userId"));
   const location = useLocation();
 
@@ -20,9 +21,9 @@ const PrivetRoute = ({ children }) => {
 const App = () => (
   <Routes>
     <Route path="/" element={(
-      <PrivetRoute>
-        <Root />
-      </PrivetRoute>
+      <PrivatRoute>
+        <Root value={{socket: io()}} />
+      </PrivatRoute>
     )}>
     </Route>
     <Route path="login" element={<Login />} />
