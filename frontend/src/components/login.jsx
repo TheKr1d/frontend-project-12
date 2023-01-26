@@ -13,7 +13,7 @@ export default function Login() {
 
   const schema = Yup.object({
     login: Yup.string().max(15, 'Максимум 15 символов'),
-    password: Yup.string().min(5, 'Минимум из 5 символов'),
+    password: Yup.string().min(3, 'Минимум из 5 символов'),
   })
   const formik = useFormik({
     initialValues: {

@@ -6,10 +6,14 @@ import { getChannelsAsync } from "../redux/asyncThunk.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addMessage } from "../redux/messages.js";
+import { useNavigate } from "react-router-dom";
 
 export default function Root({value}) {
   const dispatch = useDispatch();
   const {socket} = value;
+  const navigate = useNavigate();
+
+
   useEffect(() => {
     dispatch(getChannelsAsync());
     socket.onAny((eventName, arg) => {
@@ -32,6 +36,10 @@ export default function Root({value}) {
       formik.values.value = '';
     },
   });
+  const logOut = () => {
+    const local = window.localStorage;
+    local.clear();
+  }
   return (
     <div className="h-100 w-100 bg-light">
       <div className="h-100">
@@ -42,7 +50,10 @@ export default function Root({value}) {
                 <a className="navbar-brand" href="/">
                   Hexlet Chat
                 </a>
-                <button type="button" className="btn btn-primary">
+                <button type="button" className="btn btn-primary" onClick={() => {
+                  logOut();
+                  navigate('/login');
+                }} >
                   Выйти
                 </button>
               </div>
