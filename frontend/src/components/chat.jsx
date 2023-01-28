@@ -1,5 +1,5 @@
 import { Formik, useFormik } from "formik";
-import Group from "./renderGroup.jsx";
+import Group from "./renderChanel.jsx";
 import { Button, Form } from "react-bootstrap";
 import React from "react";
 import { getChannelsAsync } from "../redux/asyncThunk.js";
@@ -7,39 +7,49 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addMessage } from "../redux/messages.js";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-export default function Root({value}) {
+export default function Root({ value }) {
+
+  const [activeChannel, setActiveChanel] = useState('general');
+  
   const dispatch = useDispatch();
-  const {socket} = value;
   const navigate = useNavigate();
 
+  const { socket } = value;
+  const { entities } = useSelector((state) => state.channels);
+
+  const messages = useSelector((state) => state.messages);
+  const messagesList = Object.values(messages.entities).filter((i) => i.entities.chatName === activeChannel)
+  const channels = Object.values(entities);
+  
 
   useEffect(() => {
     dispatch(getChannelsAsync());
     socket.onAny((eventName, arg) => {
-    dispatch(addMessage(arg));
-  })
-  }, [dispatch, socket])
+      dispatch(addMessage(arg));
+    });
+  }, [dispatch, socket]);
 
-  const {activeId, entities} = useSelector((state) => state.channels);
-  const channels = Object.values(entities);
-  const messages = useSelector((state) => state.messages);
-  const messagesList = Object.values(messages.entities);
 
   const formik = useFormik({
     initialValues: {
       value: "",
     },
-    onSubmit: ({value}) => {
-      const {username} = JSON.parse(window.localStorage.getItem('userId'));
-      socket.emit('newMessage', {entities: {message: value, chatName: 'general', author: username}});
-      formik.values.value = '';
+    onSubmit: ({ value }) => {
+      const { username } = JSON.parse(window.localStorage.getItem("userId"));
+      socket.emit("newMessage", {
+        entities: { message: value, chatName: activeChannel, author: username },
+      });
+      formik.values.value = "";
     },
   });
+
+
   const logOut = () => {
     const local = window.localStorage;
     local.clear();
-  }
+  };
   return (
     <div className="h-100 w-100 bg-light">
       <div className="h-100">
@@ -50,10 +60,14 @@ export default function Root({value}) {
                 <a className="navbar-brand" href="/">
                   Hexlet Chat
                 </a>
-                <button type="button" className="btn btn-primary" onClick={() => {
-                  logOut();
-                  navigate('/login');
-                }} >
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    logOut();
+                    navigate("/login");
+                  }}
+                >
                   Выйти
                 </button>
               </div>
@@ -81,8 +95,10 @@ export default function Root({value}) {
                     </button>
                   </div>
                   <ul className="nav flex-column nav-pills nav-fill px-2">
-                    {channels.map((channel) => {
-                      return <Group value={{channel, activeId}} key={channel.id} />;
+                    {channels.map((channel, id) => {
+                      return (
+                        <Group value={{ channel, activeChannel, setActiveChanel }} key={id} />
+                      );
                     })}
                   </ul>
                 </div>
@@ -90,26 +106,31 @@ export default function Root({value}) {
                   <div className="d-flex flex-column h-100">
                     <div className="bg-light mb-4 p-3 shadow-sm small">
                       <p className="m-0">
-                        <b># general</b>
+                        <b># {activeChannel}</b>
                       </p>
-                      <span className="text-muted">0 сообщений</span>
+                      <span className="text-muted">{messagesList.length} сообщений</span>
                     </div>
                     <div
                       id="messages-box"
                       className="chat-messages overflow-auto px-5"
                     >
-                      {messagesList.map(({entities}, id) => {
-                        const {author, message} = entities;
+                      {messagesList
+                      
+                      .map(({ entities }, id) => {
+                        const { author, message } = entities;
                         return (
                           <div key={id}>
                             <b>{author}</b>: {message}
                           </div>
-                        )
+                        );
                       })}
                     </div>
-                    <Formik >
+                    <Formik>
                       <div className="mt-auto px-5 py-3">
-                        <Form onSubmit={formik.handleSubmit} className="py-1 border rounded-2">
+                        <Form
+                          onSubmit={formik.handleSubmit}
+                          className="py-1 border rounded-2"
+                        >
                           <div className="input-group has-validation">
                             <input
                               name="value"

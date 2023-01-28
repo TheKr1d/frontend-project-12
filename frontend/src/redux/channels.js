@@ -2,7 +2,7 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import { getChannelsAsync } from "./asyncThunk.js";
 
 const adapter = createEntityAdapter();
-const initialState = adapter.getInitialState({ activeId: null });
+const initialState = adapter.getInitialState();
 
 const slice = createSlice({
   name: "channels",
@@ -11,13 +11,8 @@ const slice = createSlice({
   extraReducers: {
     [getChannelsAsync.fulfilled]: (state, action) => {
       const { channels, currentChannelId } = action.payload;
-
-      state.activeId = currentChannelId;
-      const newChannels = channels
-        .filter((item) => !item.removable)
-        .map(({ id, name }) => ({ id, name }));
-
-      adapter.addMany(state, newChannels);
+      console.log(currentChannelId)
+      adapter.addMany(state, channels);
     },
   },
 });

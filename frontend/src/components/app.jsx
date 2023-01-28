@@ -2,7 +2,7 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "../index.css";
-import Root from "./root.jsx";
+import Root from "./chat.jsx";
 import Login from "./login.jsx";
 import ErrorPage from "./error-page.jsx";
 import { io } from "socket.io-client";
