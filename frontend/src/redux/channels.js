@@ -7,14 +7,16 @@ const initialState = adapter.getInitialState();
 const slice = createSlice({
   name: "channels",
   initialState,
-  reducers: {},
+  reducers: {
+    addChanel: adapter.addOne,
+  },
   extraReducers: {
     [getChannelsAsync.fulfilled]: (state, action) => {
       const { channels, currentChannelId } = action.payload;
-      console.log(currentChannelId)
       adapter.addMany(state, channels);
     },
   },
 });
 
+export const {addChanel} = slice.actions;
 export default slice.reducer;

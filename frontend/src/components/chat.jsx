@@ -1,36 +1,55 @@
 import { Formik, useFormik } from "formik";
-import Group from "./renderChanel.jsx";
-import { Button, Form } from "react-bootstrap";
+import Channel from "./renderChanel.jsx";
+import { Button, Form, Modal } from "react-bootstrap";
 import React from "react";
 import { getChannelsAsync } from "../redux/asyncThunk.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addMessage } from "../redux/messages.js";
+import { addChanel } from "../redux/channels.js";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export default function Root({ value }) {
 
-  const [activeChannel, setActiveChanel] = useState('general');
-  
+export default function Root({ value }) {
+  const [activeChannel, setActiveChanel] = useState("general");
+  const { socket } = value;
+
+  const [modalShow, setModalShow] = useState(false);
+  const handleClose = () => setModalShow(false);
+  const handleOpen = () => setModalShow(true);
+  const fModal = useFormik({
+    initialValues: {
+      value: "",
+    },
+    onSubmit: ({value}) => {
+      socket.emit("newChannel", { name: value});
+      handleClose();
+      fModal.values.value = '';
+    }
+  });
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { socket } = value;
   const { entities } = useSelector((state) => state.channels);
 
   const messages = useSelector((state) => state.messages);
-  const messagesList = Object.values(messages.entities).filter((i) => i.entities.chatName === activeChannel)
+  const messagesList = Object.values(messages.entities).filter(
+    (i) => i.entities.chatName === activeChannel
+  );
   const channels = Object.values(entities);
-  
 
   useEffect(() => {
     dispatch(getChannelsAsync());
     socket.onAny((eventName, arg) => {
-      dispatch(addMessage(arg));
+      if (eventName === 'newMessage') {
+        dispatch(addMessage(arg));
+      } if (eventName === 'newChannel') {
+        dispatch(addChanel(arg));
+      }
     });
   }, [dispatch, socket]);
-
 
   const formik = useFormik({
     initialValues: {
@@ -45,7 +64,6 @@ export default function Root({ value }) {
     },
   });
 
-
   const logOut = () => {
     const local = window.localStorage;
     local.clear();
@@ -58,7 +76,7 @@ export default function Root({ value }) {
             <nav className="shadow-sm navbar navbar-expand-lg navbar-light bg-white">
               <div className="container">
                 <a className="navbar-brand" href="/">
-                  Hexlet Chat
+                  No Chat
                 </a>
                 <button
                   type="button"
@@ -80,6 +98,7 @@ export default function Root({ value }) {
                     <button
                       type="button"
                       className="p-0 text-primary btn btn-group-vertical"
+                      onClick={handleOpen}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +116,10 @@ export default function Root({ value }) {
                   <ul className="nav flex-column nav-pills nav-fill px-2">
                     {channels.map((channel, id) => {
                       return (
-                        <Group value={{ channel, activeChannel, setActiveChanel }} key={id} />
+                        <Channel
+                          value={{ channel, activeChannel, setActiveChanel }}
+                          key={id}
+                        />
                       );
                     })}
                   </ul>
@@ -108,15 +130,15 @@ export default function Root({ value }) {
                       <p className="m-0">
                         <b># {activeChannel}</b>
                       </p>
-                      <span className="text-muted">{messagesList.length} сообщений</span>
+                      <span className="text-muted">
+                        {messagesList.length} сообщений
+                      </span>
                     </div>
                     <div
                       id="messages-box"
                       className="chat-messages overflow-auto px-5"
                     >
-                      {messagesList
-                      
-                      .map(({ entities }, id) => {
+                      {messagesList.map(({ entities }, id) => {
                         const { author, message } = entities;
                         return (
                           <div key={id}>
@@ -170,6 +192,33 @@ export default function Root({ value }) {
           <div className="Toastify"></div>
         </div>
       </div>
+      <Modal
+        show={modalShow}
+        onHide={handleClose}
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Добавить канал</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Formik>
+            <Form>
+              <input
+                name="value"
+                className="mb-2 form-control"
+                value={fModal.values.value}
+                onChange={fModal.handleChange}
+                autoFocus
+              />
+            </Form>
+          </Formik>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose} >Отменить</Button>
+          <Button variant="primary" onClick={fModal.handleSubmit}>Отправить</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
