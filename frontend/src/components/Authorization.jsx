@@ -1,62 +1,135 @@
 import { useFormik } from 'formik';
+import { useEffect } from 'react';
+import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
+import { clearError, loginUser } from '../slices/auth';
 
 const Authorization = () => {
-    const formik = useFormik({
-            initialValues: {
-                email: "",
-                password: ""
-            },
-            onSubmit: (values) => {
-                console.log(JSON.stringify(values, null, 2));
-            },
-        });
-        return (
-            <main className="container min-vh-100 d-flex align-items-center justify-content-center">
-                <div className="card shadow-sm" style={{ width: '100%', maxWidth: '420px' }}>
-                    <div className="card-body p-4">
-                        <h1 className="h3 text-center mb-4">Авторизация</h1>
-    
-                        <form onSubmit={formik.handleSubmit}>
-                            <div className="mb-3">
-                                <label htmlFor="email" className="form-label">
-                                    Email
-                                </label>
-    
-                                <input
-                                    id="email"
-                                    type="email"
-                                    className="form-control"
-                                    value={formik.email}
-                                    onChange={formik.handleChange}
-                                    placeholder="Введите email"
-                                    required
-                                />
-                            </div>
-    
-                            <div className="mb-3">
-                                <label htmlFor="password" className="form-label">
-                                    Пароль
-                                </label>
-    
-                                <input
-                                    id="password"
-                                    type="password"
-                                    className="form-control"
-                                    value={formik.password}
-                                    onChange={formik.handleChange}
-                                    placeholder="Введите пароль"
-                                    required
-                                />
-                            </div>
-    
-                            <button type="submit" className="btn btn-primary w-100">
-                                Войти
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </main>
-        );
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, user } = useSelector((state) => state.auth);
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    validationSchema: Yup.object({
+      username: Yup.string()
+        .min(4, t('forms.authorization.errors.username.min', { count: 4 }))
+        .required(t('forms.authorization.errors.username.required')),
+      password: Yup.string()
+        .min(5, t('forms.authorization.errors.password.min', { count: 5 }))
+        .required(t('forms.authorization.errors.password.required')),
+    }),
+    onSubmit: (values) => {
+      dispatch(loginUser(values));
+    },
+  });
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      formik.setErrors({ network: error });
+    }
+  }, [error, formik.setErrors]);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  return (
+    <Container className="min-vh-100 d-flex align-items-center justify-content-center">
+      <Row className="w-100 justify-content-center">
+        <Col xs={12} sm={10} md={8} lg={6} xl={4}>
+          <Card className="shadow-sm">
+            <Card.Body className="p-4">
+              <Card.Title as="h1" className="text-center mb-4">
+                {t('forms.authorization.title')}
+              </Card.Title>
+
+              <Form onSubmit={formik.handleSubmit} noValidate>
+                <Form.Group className="mb-3" controlId="username">
+                  <Form.Label>
+                    {t('forms.authorization.username.title')}
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={t('forms.authorization.username.placeholder')}
+                    value={formik.values.username}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isInvalid={
+                      formik.touched.username && !!formik.errors.username
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {formik.errors.username}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="password">
+                  <Form.Label>
+                    {t('forms.authorization.password.title')}
+                  </Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder={t('forms.authorization.password.placeholder')}
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    isInvalid={
+                      formik.touched.password && !!formik.errors.password
+                    }
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {formik.errors.password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                {formik.errors.network && (
+                  <div
+                    className="invalid-feedback d-block mb-3"
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <i className="bi bi-exclamation-circle me-1"></i>
+                    {formik.errors.network}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="w-100"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" />
+                      Загрузка...
+                    </>
+                  ) : (
+                    'Войти'
+                  )}
+                </Button>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
 export default Authorization;
