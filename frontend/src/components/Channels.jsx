@@ -1,4 +1,4 @@
-const Channels = ({ channels }) => {
+const Channels = ({ channels, activeChannelId }) => {
   return (
     <div className="d-flex flex-column h-100">
       <div className="border-bottom p-3">
@@ -11,7 +11,7 @@ const Channels = ({ channels }) => {
             type="button"
             key={channel.id}
             className={`list-group-item list-group-item-action ${
-              channel.id ? 'active' : ''
+              channel.id === activeChannelId ? 'active' : ''
             }`}
             onClick={() => console.log(channel.id)}
           >

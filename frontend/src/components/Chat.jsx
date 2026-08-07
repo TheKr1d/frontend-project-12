@@ -2,7 +2,11 @@ import { useFormik } from 'formik';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getChannels, selectAllChannels } from '../slices/channels';
+import {
+  getChannels,
+  selectActiveChannelId,
+  selectAllChannels,
+} from '../slices/channels';
 import { getMessages, selectAllMessages } from '../slices/messages';
 import Channels from './Channels';
 import Messages from './Messages';
@@ -12,6 +16,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user, token } = useSelector((state) => state.auth);
   const channels = useSelector(selectAllChannels);
+  const activeChannelId = useSelector(selectActiveChannelId);
   const messages = useSelector(selectAllMessages);
 
   useEffect(() => {
@@ -34,11 +39,15 @@ const Chat = () => {
     },
   });
 
+  const messagesChannel = messages.filter(
+    (m) => m.channelId === activeChannelId,
+  );
+
   return (
     <div className="container-fluid vh-100">
       <div className="row h-100">
         <aside className="col-12 col-md-4 col-lg-3 border-end bg-light p-0">
-          <Channels channels={channels} />
+          <Channels channels={channels} activeChannelId={activeChannelId} />
         </aside>
 
         <main className="col-12 col-md-8 col-lg-9 d-flex flex-column p-0">
@@ -46,7 +55,7 @@ const Chat = () => {
             <h1 className="h5 mb-0">{'Выбирите канал'}</h1>
           </header>
 
-          <Messages messages={messages} />
+          <Messages messages={messagesChannel} />
 
           <form
             className="border-top bg-white p-3"
