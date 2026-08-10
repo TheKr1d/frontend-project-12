@@ -7,7 +7,7 @@ import axios from 'axios';
 import routes from '../utils/routes';
 
 const channelsAdapter = createEntityAdapter();
-const initialState = channelsAdapter.getInitialState({ channelActiveId: null });
+const initialState = channelsAdapter.getInitialState({ activeChannelId: null });
 
 export const getChannels = createAsyncThunk(
   'channels/getChannels',
@@ -81,7 +81,11 @@ export const removeChannel = createAsyncThunk(
 const channelsSlice = createSlice({
   name: 'channels',
   initialState,
-  reducers: {},
+  reducers: {
+    setActiveChannelId: (state, action) => {
+      state.activeChannelId = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getChannels.fulfilled, (state, action) => {
@@ -104,5 +108,6 @@ export const {
 } = channelsAdapter.getSelectors((state) => state.channels);
 
 export const selectActiveChannelId = (state) => state.channels.activeChannelId;
+export const { setActiveChannelId } = channelsSlice.actions;
 
 export default channelsSlice.reducer;

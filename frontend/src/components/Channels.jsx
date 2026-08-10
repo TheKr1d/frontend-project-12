@@ -1,4 +1,8 @@
+import { useDispatch } from 'react-redux';
+import { setActiveChannelId } from '../slices/channels';
+
 const Channels = ({ channels, activeChannelId }) => {
+  const dispatch = useDispatch();
   return (
     <div className="d-flex flex-column h-100">
       <div className="border-bottom p-3">
@@ -13,7 +17,7 @@ const Channels = ({ channels, activeChannelId }) => {
             className={`list-group-item list-group-item-action ${
               channel.id === activeChannelId ? 'active' : ''
             }`}
-            onClick={() => console.log(channel.id)}
+            onClick={() => dispatch(setActiveChannelId(channel.id))}
           >
             <span className="me-1">#</span>
             {channel.name}
