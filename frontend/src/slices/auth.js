@@ -3,7 +3,13 @@ import axios from 'axios';
 import { addToken, getToken } from '../utils/funcLocalStorage';
 import routes from '../utils/routes';
 
-const initialState = { user: null, token: null, error: null, loading: false };
+const initialState = {
+  user: null,
+  isAuthorized: false,
+  token: null,
+  error: null,
+  loading: false,
+};
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
@@ -41,6 +47,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.isAuthorized = false;
     },
     clearError: (state) => {
       state.error = null;
@@ -50,6 +57,7 @@ const authSlice = createSlice({
       if (dataStorage) {
         state.user = dataStorage.username;
         state.token = dataStorage.token;
+        state.isAuthorized = true;
       }
     },
   },
@@ -58,15 +66,18 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.isAuthorized = false;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.username;
         state.token = action.payload.token;
+        state.isAuthorized = true;
       })
       .addCase(loginUser.rejected, (state, _action) => {
         state.loading = false;
         state.error = 'Ошибка авторизации';
+        state.isAuthorized = false;
       });
   },
 });

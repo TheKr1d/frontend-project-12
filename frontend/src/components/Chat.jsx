@@ -3,39 +3,77 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
+  addChannel,
   getChannels,
   selectActiveChannelId,
   selectAllChannels,
 } from '../slices/channels';
-import { getMessages, selectAllMessages } from '../slices/messages';
+import {
+  addMessage,
+  fetchAddMessage,
+  getMessages,
+  selectAllMessages,
+} from '../slices/messages';
+import { selectIsConnected } from '../slices/socket';
+import { useSocket } from '../utils/useSocket';
 import Channels from './Channels';
 import Messages from './Messages';
 
 const Chat = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.auth);
+  const { user, token, isAuthorized } = useSelector((state) => state.auth);
   const channels = useSelector(selectAllChannels);
   const activeChannelId = useSelector(selectActiveChannelId);
   const messages = useSelector(selectAllMessages);
+  const _isConnected = useSelector(selectIsConnected);
+  const { socket, on, off } = useSocket(user, token);
 
   useEffect(() => {
-    if (!user) {
+    if (!isAuthorized) {
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [isAuthorized, navigate]);
 
   useEffect(() => {
-    dispatch(getChannels(token));
-    dispatch(getMessages(token));
-  }, [token, dispatch]);
+    if (isAuthorized) {
+      dispatch(getChannels(token));
+      dispatch(getMessages(token));
+    }
+  }, [isAuthorized, dispatch, token]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (payload) => {
+      dispatch(addMessage(payload));
+    };
+
+    const handleNewChannel = (payload) => {
+      dispatch(addChannel(payload));
+    };
+
+    on('newMessage', handleNewMessage);
+    on('newChannel', handleNewChannel);
+
+    return () => {
+      off('newMessage', handleNewMessage);
+      off('newChannel', handleNewChannel);
+    };
+  }, [socket, on, off, dispatch]);
 
   const formik = useFormik({
     initialValues: {
       message: '',
     },
-    onSubmit: (values) => {
-      сonsole.log(values);
+    onSubmit: ({ message }, { resetForm }) => {
+      const newMessage = {
+        body: message,
+        channelId: activeChannelId,
+        username: user,
+      };
+      dispatch(fetchAddMessage({ token, newMessage }));
+      resetForm();
     },
   });
 
@@ -67,6 +105,8 @@ const Chat = () => {
                 name="message"
                 className="form-control"
                 placeholder="Введите сообщение..."
+                value={formik.values.message}
+                onChange={formik.handleChange}
                 //disabled={!selectedChannelId}
               />
 
