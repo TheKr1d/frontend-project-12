@@ -1,27 +1,68 @@
+import { ButtonGroup, Dropdown } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { setActiveChannelId } from '../slices/channels';
+import { setActiveChannel } from '../slices/channels';
+import { setType } from '../slices/modal';
 
 const Channels = ({ channels, activeChannelId }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  return (
-    <div className="d-flex flex-column h-100">
-      <div className="border-bottom p-3">
-        <h2 className="h5 mb-0">Каналы</h2>
-      </div>
 
+  const hangleRename = (channel) => {
+    dispatch(setActiveChannel(channel));
+    dispatch(setType({ type: 'rename', channelId: channel.id }));
+  };
+
+  return (
+    <div
+      className="flex-grow-1 overflow-auto"
+      style={{ maxHeight: 'calc(100vh - 75px)' }}
+    >
       <div className="list-group list-group-flush">
         {channels.map((channel) => (
-          <button
-            type="button"
+          <div
             key={channel.id}
-            className={`list-group-item list-group-item-action ${
+            className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
               channel.id === activeChannelId ? 'active' : ''
             }`}
-            onClick={() => dispatch(setActiveChannelId(channel.id))}
           >
-            <span className="me-1">#</span>
-            {channel.name}
-          </button>
+            <button
+              type="button"
+              className={`flex-grow-1 text-start border-0 bg-transparent p-0 ${
+                channel.id === activeChannelId ? 'active' : ''
+              }`}
+              onClick={() => dispatch(setActiveChannel(channel))}
+            >
+              <span className="me-1">#</span>
+              {channel.name}
+            </button>
+            {channel.removable && (
+              <Dropdown as={ButtonGroup} drop="end">
+                <Dropdown.Toggle
+                  as="span"
+                  id={`dropdown-channels-${channel.id}`}
+                  variant="secondary"
+                  className="dropdown-toggle-split"
+                  style={{ cursor: 'pointer' }}
+                />
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => hangleRename(channel)}>
+                    {t('forms.channels.buttons.rename')}
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item
+                    onClick={() =>
+                      dispatch(
+                        setType({ type: 'delete', channelId: channel.id }),
+                      )
+                    }
+                  >
+                    {t('forms.channels.buttons.delete')}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
+          </div>
         ))}
       </div>
     </div>

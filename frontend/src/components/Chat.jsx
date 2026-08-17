@@ -1,12 +1,20 @@
 import { useFormik } from 'formik';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Button, Form, Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
 import {
   addChannel,
+  edditChannel,
+  fetchAddChannel,
+  fetchEditChannel,
+  fetchRemoveChannel,
   getChannels,
-  selectActiveChannelId,
+  removeChannel,
   selectAllChannels,
+  setActiveChannel,
 } from '../slices/channels';
 import {
   addMessage,
@@ -14,19 +22,31 @@ import {
   getMessages,
   selectAllMessages,
 } from '../slices/messages';
+import { close } from '../slices/modal';
 import { selectIsConnected } from '../slices/socket';
 import { useSocket } from '../utils/useSocket';
 import Channels from './Channels';
 import Messages from './Messages';
 
 const Chat = () => {
+  const [isAddingChannel, setIsAddingChannel] = useState(false);
+
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token, isAuthorized } = useSelector((state) => state.auth);
+
   const channels = useSelector(selectAllChannels);
-  const activeChannelId = useSelector(selectActiveChannelId);
+  const { activeChannel, defaultChannel } = useSelector(
+    (state) => state.channels,
+  );
+  const activeChannelId = activeChannel?.id;
   const messages = useSelector(selectAllMessages);
   const _isConnected = useSelector(selectIsConnected);
+  const { user, token, isAuthorized } = useSelector((state) => state.auth);
+  const { type: typeModal, channelId: thisChannelId } = useSelector(
+    (state) => state.modal,
+  );
+
   const { socket, on, off } = useSocket(user, token);
 
   useEffect(() => {
@@ -51,18 +71,31 @@ const Chat = () => {
 
     const handleNewChannel = (payload) => {
       dispatch(addChannel(payload));
+      dispatch(setActiveChannel(payload));
+    };
+
+    const handleRenameChannel = (payload) => {
+      dispatch(edditChannel(payload));
+    };
+
+    const handleRemoveChannel = (payload) => {
+      dispatch(removeChannel(payload));
+      dispatch(setActiveChannel(defaultChannel));
     };
 
     on('newMessage', handleNewMessage);
     on('newChannel', handleNewChannel);
+    on('renameChannel', handleRenameChannel);
+    on('removeChannel', handleRemoveChannel);
 
     return () => {
       off('newMessage', handleNewMessage);
       off('newChannel', handleNewChannel);
+      off('renameChannel', handleRenameChannel);
     };
-  }, [socket, on, off, dispatch]);
+  }, [socket, on, off, dispatch, defaultChannel]);
 
-  const formik = useFormik({
+  const messageFormik = useFormik({
     initialValues: {
       message: '',
     },
@@ -77,6 +110,62 @@ const Chat = () => {
     },
   });
 
+  const channelFormik = useFormik({
+    initialValues: {
+      channelName: '',
+    },
+    validationSchema: Yup.object({
+      channelName: Yup.string()
+        .min(3, t('forms.channels.errors.min', { count: 3 }))
+        .max(20, t('forms.channels.errors.max', { count: 20 }))
+        .required(t('forms.channels.errors.required'))
+        .notOneOf(
+          channels.map((ch) => ch.name),
+          t('forms.channels.errors.dublicate'),
+        ),
+    }),
+    onSubmit: ({ channelName }, { resetForm, setSubmitting }) => {
+      const newChannel = { name: channelName };
+      dispatch(fetchAddChannel({ token, newChannel }));
+      setIsAddingChannel(false);
+      resetForm();
+      setSubmitting(false);
+    },
+  });
+
+  const renameFormik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      newChannelName: activeChannel?.name || '',
+    },
+    validationSchema: Yup.object({
+      newChannelName: Yup.string()
+        .min(3, t('forms.channels.errors.min', { count: 3 }))
+        .max(20, t('forms.channels.errors.max', { count: 20 }))
+        .required(t('forms.channels.errors.required'))
+        .notOneOf(
+          channels.map((ch) => ch.name),
+          t('forms.channels.errors.dublicate'),
+        ),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      dispatch(
+        fetchEditChannel({
+          token,
+          id: thisChannelId,
+          name: values.newChannelName,
+        }),
+      );
+      resetForm();
+      dispatch(close());
+    },
+  });
+
+  const submitRemoveChannel = () => {
+    dispatch(fetchRemoveChannel({ token, id: activeChannelId }));
+    dispatch(close());
+  };
+
   const messagesChannel = messages.filter(
     (m) => m.channelId === activeChannelId,
   );
@@ -85,41 +174,168 @@ const Chat = () => {
     <div className="container-fluid vh-100">
       <div className="row h-100">
         <aside className="col-12 col-md-4 col-lg-3 border-end bg-light p-0">
-          <Channels channels={channels} activeChannelId={activeChannelId} />
+          <div className="d-flex flex-column h-100">
+            <div className="border-bottom p-3 d-flex justify-content-between align-items-center">
+              <h2 className="h5 mb-0">{t('titles.channels')}</h2>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+                style={{ width: '30px' }}
+                onClick={() => {
+                  setIsAddingChannel(!isAddingChannel);
+                  if (isAddingChannel) {
+                    channelFormik.resetForm();
+                  }
+                }}
+                aria-label="Добавить канал"
+              >
+                <span className="fs-5">{isAddingChannel ? 'x' : '+'}</span>
+              </button>
+            </div>
+
+            <div
+              className={`px-3 pb-3 ${isAddingChannel ? 'd-block' : 'd-none'}`}
+            >
+              <form onSubmit={channelFormik.handleSubmit}>
+                <div className="input-group input-group-sm">
+                  <input
+                    id="channelName"
+                    name="channelName"
+                    type="text"
+                    className={`form-control form-control-sm ${
+                      channelFormik.touched.channelName &&
+                      channelFormik.errors.channelName
+                        ? 'is-invalid'
+                        : ''
+                    }`}
+                    placeholder={t('forms.channels.placeholder')}
+                    value={channelFormik.values.channelName}
+                    onChange={channelFormik.handleChange}
+                    onBlur={channelFormik.handleBlur}
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={
+                      !channelFormik.isValid ||
+                      !channelFormik.dirty ||
+                      channelFormik.isSubmitting
+                    }
+                  >
+                    {t('forms.channels.buttons.add')}
+                  </button>
+                </div>
+                {channelFormik.touched.channelName &&
+                  channelFormik.errors.channelName && (
+                    <div className="invalid-feedback d-block mt-1 small">
+                      {channelFormik.errors.channelName}
+                    </div>
+                  )}
+              </form>
+            </div>
+
+            <Channels channels={channels} activeChannelId={activeChannelId} />
+          </div>
         </aside>
 
         <main className="col-12 col-md-8 col-lg-9 d-flex flex-column p-0">
           <header className="border-bottom p-3">
-            <h1 className="h5 mb-0">{'Выбирите канал'}</h1>
+            <h1 className="h5 mb-0">
+              {activeChannel?.name ?? t('channels.selectChannel')}
+            </h1>
           </header>
-
-          <Messages messages={messagesChannel} />
+          <div
+            className="flex-grow-1 overflow-auto"
+            style={{ maxHeight: 'calc(100vh - 130px)' }}
+          >
+            <Messages messages={messagesChannel} />
+          </div>
 
           <form
             className="border-top bg-white p-3"
-            onSubmit={formik.handleSubmit}
+            onSubmit={messageFormik.handleSubmit}
           >
             <div className="input-group">
               <input
                 type="text"
                 name="message"
                 className="form-control"
-                placeholder="Введите сообщение..."
-                value={formik.values.message}
-                onChange={formik.handleChange}
-                //disabled={!selectedChannelId}
+                placeholder={t('forms.message.placeholder')}
+                value={messageFormik.values.message}
+                onChange={messageFormik.handleChange}
+                disabled={!activeChannelId}
               />
-
               <button
                 type="submit"
                 className="btn btn-primary"
-                //disabled={!selectedChannelId}
+                disabled={!activeChannelId}
               >
-                Отправить
+                {t('forms.message.button')}
               </button>
             </div>
           </form>
         </main>
+
+        <Modal show={typeModal === 'rename'} onHide={() => dispatch(close())}>
+          <Modal.Header closeButton>
+            <Modal.Title>{`Переименовать канал: "${activeChannel?.name}"`}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={renameFormik.handleSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Control
+                  type="text"
+                  name="newChannelName"
+                  placeholder="Новое название канала"
+                  value={renameFormik.values.newChannelName}
+                  onChange={renameFormik.handleChange}
+                  isInvalid={
+                    renameFormik.touched && !!renameFormik.errors.newChannelName
+                  }
+                />
+                <Form.Control.Feedback type="invalid">
+                  {renameFormik.errors.newChannelName}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => dispatch(close())}>
+              Отменить
+            </Button>
+            <Button
+              variant="primary"
+              onClick={renameFormik.handleSubmit}
+              disabled={
+                !renameFormik.isValid ||
+                !renameFormik.dirty ||
+                renameFormik.isSubmitting
+              }
+            >
+              Изменить
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={typeModal === 'delete'} onHide={() => dispatch(close())}>
+          <Modal.Header closeButton>
+            <Modal.Title>{activeChannel?.name}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              {t('forms.modal.realeDeleted')}
+              <br />
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => dispatch(close())}>
+              Отменить
+            </Button>
+            <Button variant="danger" onClick={submitRemoveChannel}>
+              Удалить
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </div>
   );
