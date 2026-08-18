@@ -5,19 +5,18 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { clearError, createNewUser } from '../slices/auth';
+import { clearError, loginUser } from '../slices/auth';
 
-const Authorization = () => {
+const Login = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthorized } = useSelector((state) => state.auth);
+  const { loading, error, user } = useSelector((state) => state.auth);
 
   const formik = useFormik({
     initialValues: {
       username: '',
       password: '',
-      passwordRepeat: '',
     },
     validationSchema: Yup.object({
       username: Yup.string()
@@ -26,26 +25,29 @@ const Authorization = () => {
       password: Yup.string()
         .min(6, t('validation.min', { count: 6 }))
         .required(t('validation.required')),
-      passwordRepeat: Yup.string()
-        .oneOf([Yup.ref('password'), null], t('validation.passwordsMatch'))
-        .required(t('validation.required')),
     }),
     onSubmit: (values) => {
-      dispatch(createNewUser(values));
+      dispatch(loginUser(values));
     },
   });
-
-  useEffect(() => {
-    if (isAuthorized) {
-      navigate('/');
-    }
-  }, [isAuthorized, navigate]);
 
   useEffect(() => {
     return () => {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (error) {
+  //     formik.setErrors({ network: error });
+  //   }
+  // }, [error, formik.setErrors]);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   return (
     <Container className="min-vh-100 d-flex align-items-center justify-content-center">
@@ -92,26 +94,12 @@ const Authorization = () => {
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="passwordRepeat">
-                  <Form.Label>{t('common.labels.password')}</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder={t('common.placeholders.passwordRepeat')}
-                    value={formik.values.passwordRepeat}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    isInvalid={
-                      formik.touched.passwordRepeat &&
-                      !!formik.errors.passwordRepeat
-                    }
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.passwordRepeat}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
                 {error && (
-                  <div className="alert alert-danger" role="alert">
+                  <div
+                    className="invalid-feedback d-block mb-3"
+                    style={{ fontSize: '0.875rem' }}
+                  >
+                    <i className="bi bi-exclamation-circle me-1"></i>
                     {error}
                   </div>
                 )}
@@ -140,4 +128,4 @@ const Authorization = () => {
   );
 };
 
-export default Authorization;
+export default Login;

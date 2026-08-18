@@ -10,6 +10,8 @@ import { Provider, useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Authorization from './components/Authorization.jsx';
 import Chat from './components/Chat.jsx';
+import Login from './components/Login.jsx';
+import NavScrollExample from './components/Navbar.jsx';
 import NotFound from './components/NotFound.jsx';
 import resources from './locales/index.js';
 import { restoreAuth } from './slices/auth.js';
@@ -30,11 +32,14 @@ const App = ({ i18n }) => {
           v7_startTransition: true,
         }}
       >
-        <Routes>
-          <Route path="*" element={<NotFound />} />
-          <Route path="/" element={<Chat />} />
-          <Route path="/login" element={<Authorization />} />
-        </Routes>
+        <NavScrollExample>
+          <Routes>
+            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<Chat />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Authorization />} />
+          </Routes>
+        </NavScrollExample>
       </BrowserRouter>
     </I18nextProvider>
   );

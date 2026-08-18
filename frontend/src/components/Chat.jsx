@@ -116,12 +116,12 @@ const Chat = () => {
     },
     validationSchema: Yup.object({
       channelName: Yup.string()
-        .min(3, t('forms.channels.errors.min', { count: 3 }))
-        .max(20, t('forms.channels.errors.max', { count: 20 }))
-        .required(t('forms.channels.errors.required'))
+        .min(3, t('validation.min', { count: 3 }))
+        .max(20, t('validation.max', { count: 20 }))
+        .required(t('validation.required'))
         .notOneOf(
           channels.map((ch) => ch.name),
-          t('forms.channels.errors.dublicate'),
+          t('validation.channelDuplicate'),
         ),
     }),
     onSubmit: ({ channelName }, { resetForm, setSubmitting }) => {
@@ -140,12 +140,12 @@ const Chat = () => {
     },
     validationSchema: Yup.object({
       newChannelName: Yup.string()
-        .min(3, t('forms.channels.errors.min', { count: 3 }))
-        .max(20, t('forms.channels.errors.max', { count: 20 }))
-        .required(t('forms.channels.errors.required'))
+        .min(3, t('validation.min', { count: 3 }))
+        .max(20, t('validation.max', { count: 20 }))
+        .required(t('validation.required'))
         .notOneOf(
           channels.map((ch) => ch.name),
-          t('forms.channels.errors.dublicate'),
+          t('validation.channelDuplicate'),
         ),
     }),
     onSubmit: (values, { resetForm }) => {
@@ -176,7 +176,7 @@ const Chat = () => {
         <aside className="col-12 col-md-4 col-lg-3 border-end bg-light p-0">
           <div className="d-flex flex-column h-100">
             <div className="border-bottom p-3 d-flex justify-content-between align-items-center">
-              <h2 className="h5 mb-0">{t('titles.channels')}</h2>
+              <h2 className="h5 mb-0">{t('common.titles.channels')}</h2>
               <button
                 type="button"
                 className="btn btn-sm btn-outline-primary"
@@ -208,7 +208,7 @@ const Chat = () => {
                         ? 'is-invalid'
                         : ''
                     }`}
-                    placeholder={t('forms.channels.placeholder')}
+                    placeholder={t('common.placeholders.channelName')}
                     value={channelFormik.values.channelName}
                     onChange={channelFormik.handleChange}
                     onBlur={channelFormik.handleBlur}
@@ -222,7 +222,7 @@ const Chat = () => {
                       channelFormik.isSubmitting
                     }
                   >
-                    {t('forms.channels.buttons.add')}
+                    {t('common.buttons.add')}
                   </button>
                 </div>
                 {channelFormik.touched.channelName &&
@@ -241,12 +241,12 @@ const Chat = () => {
         <main className="col-12 col-md-8 col-lg-9 d-flex flex-column p-0">
           <header className="border-bottom p-3">
             <h1 className="h5 mb-0">
-              {activeChannel?.name ?? t('channels.selectChannel')}
+              {activeChannel?.name ?? t('forms.channel.select')}
             </h1>
           </header>
           <div
             className="flex-grow-1 overflow-auto"
-            style={{ maxHeight: 'calc(100vh - 130px)' }}
+            style={{ maxHeight: 'calc(100vh - 200px)' }}
           >
             <Messages messages={messagesChannel} />
           </div>
@@ -260,7 +260,7 @@ const Chat = () => {
                 type="text"
                 name="message"
                 className="form-control"
-                placeholder={t('forms.message.placeholder')}
+                placeholder={t('common.placeholders.message')}
                 value={messageFormik.values.message}
                 onChange={messageFormik.handleChange}
                 disabled={!activeChannelId}
@@ -270,7 +270,7 @@ const Chat = () => {
                 className="btn btn-primary"
                 disabled={!activeChannelId}
               >
-                {t('forms.message.button')}
+                {t('common.buttons.send')}
               </button>
             </div>
           </form>
@@ -323,7 +323,7 @@ const Chat = () => {
           </Modal.Header>
           <Modal.Body>
             <p>
-              {t('forms.modal.realeDeleted')}
+              {t('forms.channel.delete.confirm')}
               <br />
             </p>
           </Modal.Body>

@@ -16,20 +16,20 @@ const Channels = ({ channels, activeChannelId }) => {
   return (
     <div
       className="flex-grow-1 overflow-auto"
-      style={{ maxHeight: 'calc(100vh - 75px)' }}
+      style={{ maxHeight: 'calc(100vh - 150px)' }}
     >
       <div className="list-group list-group-flush">
         {channels.map((channel) => (
           <div
             key={channel.id}
-            className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
+            className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center px-3 py-2 ${
               channel.id === activeChannelId ? 'active' : ''
             }`}
           >
             <button
               type="button"
               className={`flex-grow-1 text-start border-0 bg-transparent p-0 ${
-                channel.id === activeChannelId ? 'active' : ''
+                channel.id === activeChannelId ? 'text-white' : ''
               }`}
               onClick={() => dispatch(setActiveChannel(channel))}
             >
@@ -37,7 +37,7 @@ const Channels = ({ channels, activeChannelId }) => {
               {channel.name}
             </button>
             {channel.removable && (
-              <Dropdown as={ButtonGroup} drop="end">
+              <Dropdown as={ButtonGroup} drop="end" size="sm">
                 <Dropdown.Toggle
                   as="span"
                   id={`dropdown-channels-${channel.id}`}
@@ -47,7 +47,7 @@ const Channels = ({ channels, activeChannelId }) => {
                 />
                 <Dropdown.Menu>
                   <Dropdown.Item onClick={() => hangleRename(channel)}>
-                    {t('forms.channels.buttons.rename')}
+                    {t('common.buttons.rename')}
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item
@@ -57,7 +57,7 @@ const Channels = ({ channels, activeChannelId }) => {
                       )
                     }
                   >
-                    {t('forms.channels.buttons.delete')}
+                    {t('common.buttons.delete')}
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
