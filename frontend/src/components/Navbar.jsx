@@ -13,6 +13,15 @@ const NavScrollExample = ({ children }) => {
   const navigate = useNavigate();
   const { isAuthorized } = useSelector((state) => state.auth);
 
+  const handleRedirectChat = (e) => {
+    e.preventDefault();
+
+    if (!isAuthorized) {
+      notificationService.info('notifications.dontAutorised');
+    }
+    navigate('/');
+  };
+
   const handleLogin = () => {
     if (isAuthorized) {
       dispatch(logout());
@@ -41,7 +50,11 @@ const NavScrollExample = ({ children }) => {
     <>
       <Navbar bg="light" expand="lg" className="shadow-sm">
         <Container fluid>
-          <Navbar.Brand href="/" className="fw-bold">
+          <Navbar.Brand
+            onClick={handleRedirectChat}
+            href="/"
+            className="fw-bold"
+          >
             Hexlet Chat
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarScroll" />

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import i18n from '../i18n.js';
 import { addToken, getToken, removeToken } from '../utils/funcLocalStorage';
 import { notificationService } from '../utils/notificationService';
 import routes from '../utils/routes';
@@ -31,19 +32,21 @@ export const loginUser = createAsyncThunk(
         token: response.data.token,
       };
     } catch (error) {
-      console.error('notifications.fetchError', error);
+      //console.error('notifications.fetchError', error);
       notificationService.updateLoadingToError(
         loadId,
         'notifications.loginUserError',
       );
       if (error.response) {
         return rejectWithValue(
-          error.response.data?.message || 'notifications.serverError',
+          error.response.data?.message || i18n.t('notifications.serverError'),
         );
       } else if (error.request) {
-        return rejectWithValue('notifications.serverIsNotResponding');
+        return rejectWithValue(i18n.t('notifications.serverIsNotResponding'));
       } else {
-        return rejectWithValue(error.message || 'notifications.fetchError');
+        return rejectWithValue(
+          error.message || i18n.t('notifications.fetchError'),
+        );
       }
     }
   },
@@ -71,22 +74,26 @@ export const createNewUser = createAsyncThunk(
         token: response.data.token,
       };
     } catch (error) {
-      console.error('Ошибка запроса:', error);
+      //console.error('Ошибка запроса:', error);
       notificationService.updateLoadingToError(
         loadId,
         'notifications.authUserError',
       );
       if (error.response) {
         if (error.response.status === 401) {
-          return rejectWithValue('notifications.authUserErrorUsernameAndPass');
+          return rejectWithValue(
+            i18n.t('notifications.authUserErrorUsernameAndPass'),
+          );
         }
         return rejectWithValue(
-          error.response.data?.message || 'notifications.serverError',
+          error.response.data?.message || i18n.t('notifications.serverError'),
         );
       } else if (error.request) {
-        return rejectWithValue('notifications.serverIsNotResponding');
+        return rejectWithValue(i18n.t('notifications.serverIsNotResponding'));
       } else {
-        return rejectWithValue(error.message || 'notifications.fetchError');
+        return rejectWithValue(
+          error.message || i18n.t('notifications.fetchError'),
+        );
       }
     }
   },
@@ -129,7 +136,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, _action) => {
         state.loading = false;
-        state.error = 'notifications.authUserError';
+        state.error = i18n.t('notifications.authUserError');
         state.isAuthorized = false;
       })
 

@@ -23,7 +23,7 @@ export const getChannels = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      console.error('Ошибка загрузки каналов:', error);
+      //console.error('Ошибка загрузки каналов:', error);
       return rejectWithValue(error.message);
     }
   },
@@ -44,7 +44,7 @@ export const fetchAddChannel = createAsyncThunk(
       );
       return response.data; // =>[{ id: '1', name: 'general', removable: false }, ...]
     } catch (error) {
-      console.error('Ошибка добавления канала:', error);
+      //console.error('Ошибка добавления канала:', error);
       notificationService.updateLoadingToError(
         loadId,
         'notifications.channelCreateError',
@@ -74,7 +74,7 @@ export const fetchEditChannel = createAsyncThunk(
       );
       return response.data; // => { id: '3', name: 'new name channel', removable: true }
     } catch (error) {
-      console.error('Ошибка изменения канала:', error);
+      //console.error('Ошибка изменения канала:', error);
       notificationService.updateLoadingToError(
         loadId,
         'notifications.channelRenamedError',
@@ -99,7 +99,7 @@ export const fetchRemoveChannel = createAsyncThunk(
       );
       return response.data; // => { id: '3' }
     } catch (error) {
-      console.error('Ошибка изменения канала:', error);
+      //console.error('Ошибка изменения канала:', error);
       notificationService.updateLoadingToError(
         loadId,
         'notifications.channelDeletedError',
