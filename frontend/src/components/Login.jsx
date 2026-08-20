@@ -11,7 +11,7 @@ const Login = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, user } = useSelector((state) => state.auth);
+  const { loading, error, isAuthorized } = useSelector((state) => state.auth);
 
   const formik = useFormik({
     initialValues: {
@@ -37,17 +37,11 @@ const Login = () => {
     };
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (error) {
-  //     formik.setErrors({ network: error });
-  //   }
-  // }, [error, formik.setErrors]);
-
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (isAuthorized) {
+      navigate('/', { replace: true });
     }
-  }, [user, navigate]);
+  }, [isAuthorized, navigate]);
 
   return (
     <Container className="min-vh-100 d-flex align-items-center justify-content-center">
