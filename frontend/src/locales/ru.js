@@ -29,7 +29,13 @@ export default {
         channels: 'Каналы',
         authorization: 'Авторизация',
         login: 'Вход',
+        logined: 'Войти',
         signup: 'Регистрация',
+        info: 'Информация',
+        succes: 'Успех',
+        error: 'Ошибка',
+        attention: 'Внимание',
+        loading: 'Загрузка',
       },
     },
 
@@ -92,11 +98,39 @@ export default {
 
     // Уведомления
     notifications: {
-      channelCreated: 'Канал "{{name}}" создан',
-      channelRenamed: 'Канал переименован в "{{name}}"',
-      channelDeleted: 'Канал "{{name}}" удален',
+      channelCreated: 'Создаем новый канал. Пожалуйста, подождите',
+      channelRenamed: 'Меняем имя канала. Пожалуйста, подождите',
+      channelDeleted: 'Удаляем канал. Пожалуйста, подождите',
+      channelCreatedSucces: 'Канал успешно создан!',
+      channelCreateError: 'При создании канала возникла ошибка',
+      channelRenamedSucces: 'Канал успешно изменен!',
+      channelRenamedError: 'При изменении имени канала возникла ошибка',
+      channelDeletedSucces: 'Канал успешно удален!',
+      channelDeletedError: 'При удалении канала возникла ошибка',
+
+      messageFetchError: 'Ошибка загрузки сообщений',
+      messageAddError: 'Ошибка добавления сообщения',
+
       authSuccess: 'Добро пожаловать, {{username}}!',
       authError: 'Ошибка авторизации. Проверьте данные.',
+      authUserLoad: 'Осуществляем регистрацию нового пользователя',
+      authUserSucces: 'Вы были успешно зарегестрированы!',
+      authUserError: 'Произошла ошибка при регстрации',
+      authUserErrorUsernameAndPass: 'Неверное имя пользователя или пароль',
+
+      loginUserLoad: 'Осуществляем вход в систему',
+      loginUserSucces: 'Вы успешно вошли!',
+      loginUserError: 'При входе возникла ошибка',
+
+      serverError: 'Ошибка сервера',
+      serverIsNotResponding: 'Сервер не отвечает',
+
+      fetchError: 'Ошибка отправки запроса',
+      dontAutorised:
+        'Для перехода в чат, Вам необходимо войти или зарегестрироваться.',
+
+      infoLogout:
+        'Вы вышли из системы. Для возвращения нужно войти заново или зарегестрироваться.',
     },
   },
 };

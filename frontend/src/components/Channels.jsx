@@ -37,7 +37,12 @@ const Channels = ({ channels, activeChannelId }) => {
               {channel.name}
             </button>
             {channel.removable && (
-              <Dropdown as={ButtonGroup} drop="end" size="sm">
+              <Dropdown
+                as={ButtonGroup}
+                drop="end"
+                size="sm"
+                onClick={() => dispatch(setActiveChannel(channel))}
+              >
                 <Dropdown.Toggle
                   as="span"
                   id={`dropdown-channels-${channel.id}`}

@@ -19,7 +19,7 @@ export const getMessages = createAsyncThunk(
       });
       return response.data; // =>[{ id: '1', body: 'text message', channelId: '1', username: 'admin }, ...]
     } catch (error) {
-      console.error('Ошибка загрузки сообщений:', error);
+      console.error('notifications.messageFetchError', error);
       return rejectWithValue(error.message);
     }
   },
@@ -36,48 +36,11 @@ export const fetchAddMessage = createAsyncThunk(
       });
       return response.data; // => { id: '1', body: 'new message', channelId: '1', username: 'admin }
     } catch (error) {
-      console.error('Ошибка добавления сообщения:', error);
+      console.error('notifications.messageAddError', error);
       return rejectWithValue(error.message);
     }
   },
 );
-
-// export const editMessage = createAsyncThunk(
-//   'messages/editMessage',
-//   async (token, id, editedMessage) => {
-//     // { body: 'new body message' };
-//     if (!token) return {};
-//     try {
-//       const response = await axios.patch(
-//         routes.editMessage(id),
-//         editedMessage,
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         },
-//       );
-//       return response.data; // => { id: '1', body: 'new body message', channelId: '1', username: 'admin }
-//     } catch (error) {
-//       console.error('Ошибка изменения сообщения:', error);
-//       return rejectWithValue(error.message);
-//     }
-//   },
-// );
-
-// export const removeMessage = createAsyncThunk(
-//   'messages/removeMessage',
-//   async (token, id) => {
-//     if (!token) return {};
-//     try {
-//       const response = await axios.patch(routes.removeMessage(id), {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       return response.data; // => { id: '3' }
-//     } catch (error) {
-//       console.error('Ошибка изменения сообщения:', error);
-//       return rejectWithValue(error.message);
-//     }
-//   },
-// );
 
 const messagesSlice = createSlice({
   name: 'messages',

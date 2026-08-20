@@ -54,7 +54,7 @@ const Authorization = () => {
           <Card className="shadow-sm">
             <Card.Body className="p-4">
               <Card.Title as="h1" className="text-center mb-4">
-                {t('common.titles.authorization')}
+                {t('common.titles.signup')}
               </Card.Title>
 
               <Form onSubmit={formik.handleSubmit} noValidate>
@@ -125,10 +125,10 @@ const Authorization = () => {
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" />
-                      Загрузка...
+                      {t('common.titles.loading')}
                     </>
                   ) : (
-                    'Войти'
+                    t('common.titles.logined')
                   )}
                 </Button>
               </Form>

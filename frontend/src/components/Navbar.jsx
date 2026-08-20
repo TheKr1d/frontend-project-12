@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../slices/auth';
+import { notificationService } from '../utils/notificationService';
 
 const NavScrollExample = ({ children }) => {
   const { t } = useTranslation();
@@ -12,19 +13,28 @@ const NavScrollExample = ({ children }) => {
   const navigate = useNavigate();
   const { isAuthorized } = useSelector((state) => state.auth);
 
-  const hangleLogin = () => {
-    dispatch(logout());
-    navigate(`/login`);
+  const handleLogin = () => {
+    if (isAuthorized) {
+      dispatch(logout());
+      notificationService.info('notifications.infoLogout');
+    }
+    navigate('/login', { replace: true });
   };
 
-  const hangleSignup = () => {
-    dispatch(logout());
-    navigate(`/signup`);
+  const handleSignup = () => {
+    if (isAuthorized) {
+      dispatch(logout());
+      notificationService.info('notifications.infoLogout');
+    }
+    navigate('/signup', { replace: true });
   };
 
-  const hangleLogout = () => {
+  const handleLogout = () => {
+    if (isAuthorized) {
+      dispatch(logout());
+      notificationService.info('notifications.infoLogout');
+    }
     navigate(`/login`);
-    dispatch(logout());
   };
 
   return (
@@ -37,21 +47,29 @@ const NavScrollExample = ({ children }) => {
           <Navbar.Toggle aria-controls="navbarScroll" />
           <Navbar.Collapse id="navbarScroll" className="justify-content-end">
             <div className="d-flex gap-2">
-              <Button variant="outline-primary" size="sm" onClick={hangleLogin}>
-                {t('common.buttons.login')}
-              </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={hangleSignup}
-              >
-                {t('common.buttons.signup')}
-              </Button>
+              {!isAuthorized && (
+                <>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleLogin}
+                  >
+                    {t('common.buttons.login')}
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleSignup}
+                  >
+                    {t('common.buttons.signup')}
+                  </Button>
+                </>
+              )}
               {isAuthorized && (
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={hangleLogout}
+                  onClick={handleLogout}
                 >
                   {t('common.buttons.logout')}
                 </Button>

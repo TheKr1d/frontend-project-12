@@ -4,6 +4,7 @@ import {
   createSlice,
 } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { notificationService } from '../utils/notificationService';
 import routes from '../utils/routes';
 
 const channelsAdapter = createEntityAdapter();
@@ -32,13 +33,22 @@ export const fetchAddChannel = createAsyncThunk(
   'channels/fetchAddChannel',
   async ({ token, newChannel }) => {
     if (!token) return [];
+    const loadId = notificationService.loading('notifications.channelCreated');
     try {
       const response = await axios.post(routes.addChannel(), newChannel, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      notificationService.updateLoadingToSuccess(
+        loadId,
+        'notifications.channelCreatedSucces',
+      );
       return response.data; // =>[{ id: '1', name: 'general', removable: false }, ...]
     } catch (error) {
       console.error('Ошибка добавления канала:', error);
+      notificationService.updateLoadingToError(
+        loadId,
+        'notifications.channelCreateError',
+      );
       return rejectWithValue(error.message);
     }
   },
@@ -49,6 +59,7 @@ export const fetchEditChannel = createAsyncThunk(
   async ({ token, id, name }) => {
     // editedChannel: { name: 'new name channel' }
     if (!token) return {};
+    const loadId = notificationService.loading('notifications.channelRenamed');
     try {
       const response = await axios.patch(
         routes.editChannel(id),
@@ -57,9 +68,17 @@ export const fetchEditChannel = createAsyncThunk(
           headers: { Authorization: `Bearer ${token}` },
         },
       );
+      notificationService.updateLoadingToSuccess(
+        loadId,
+        'notifications.channelRenamedSucces',
+      );
       return response.data; // => { id: '3', name: 'new name channel', removable: true }
     } catch (error) {
       console.error('Ошибка изменения канала:', error);
+      notificationService.updateLoadingToError(
+        loadId,
+        'notifications.channelRenamedError',
+      );
       return rejectWithValue(error.message);
     }
   },
@@ -69,13 +88,22 @@ export const fetchRemoveChannel = createAsyncThunk(
   'channels/fetchRemoveChannel',
   async ({ token, id }) => {
     if (!token) return {};
+    const loadId = notificationService.loading('notifications.channelDeleted');
     try {
       const response = await axios.delete(routes.removeChannel(id), {
         headers: { Authorization: `Bearer ${token}` },
       });
+      notificationService.updateLoadingToSuccess(
+        loadId,
+        'notifications.channelDeletedSucces',
+      );
       return response.data; // => { id: '3' }
     } catch (error) {
       console.error('Ошибка изменения канала:', error);
+      notificationService.updateLoadingToError(
+        loadId,
+        'notifications.channelDeletedError',
+      );
       return rejectWithValue(error.message);
     }
   },

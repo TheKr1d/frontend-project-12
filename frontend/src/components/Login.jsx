@@ -23,7 +23,7 @@ const Login = () => {
         .min(4, t('validation.min', { count: 4 }))
         .required(t('validation.required')),
       password: Yup.string()
-        .min(6, t('validation.min', { count: 6 }))
+        .min(5, t('validation.min', { count: 5 }))
         .required(t('validation.required')),
     }),
     onSubmit: (values) => {
@@ -56,7 +56,7 @@ const Login = () => {
           <Card className="shadow-sm">
             <Card.Body className="p-4">
               <Card.Title as="h1" className="text-center mb-4">
-                {t('common.titles.authorization')}
+                {t('common.titles.login')}
               </Card.Title>
 
               <Form onSubmit={formik.handleSubmit} noValidate>

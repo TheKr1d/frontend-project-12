@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { addToken, getToken, removeToken } from '../utils/funcLocalStorage';
+import { notificationService } from '../utils/notificationService';
 import routes from '../utils/routes';
 
 const initialState = {
@@ -14,27 +15,35 @@ const initialState = {
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ username, password }, { rejectWithValue }) => {
+    const loadId = notificationService.loading('notifications.loginUserLoad');
     try {
       const response = await axios.post(routes.login(), { username, password });
       addToken({
         username: response.data.username,
         token: response.data.token,
       });
+      notificationService.updateLoadingToSuccess(
+        loadId,
+        'notifications.loginUserSucces',
+      );
       return {
         username: response.data.username,
         token: response.data.token,
       };
     } catch (error) {
-      console.error('Ошибка запроса:', error);
-
+      console.error('notifications.fetchError', error);
+      notificationService.updateLoadingToError(
+        loadId,
+        'notifications.loginUserError',
+      );
       if (error.response) {
         return rejectWithValue(
-          error.response.data?.message || 'Ошибка сервера',
+          error.response.data?.message || 'notifications.serverError',
         );
       } else if (error.request) {
-        return rejectWithValue('Сервер не отвечает');
+        return rejectWithValue('notifications.serverIsNotResponding');
       } else {
-        return rejectWithValue(error.message || 'Ошибка отправки запроса');
+        return rejectWithValue(error.message || 'notifications.fetchError');
       }
     }
   },
@@ -43,6 +52,7 @@ export const loginUser = createAsyncThunk(
 export const createNewUser = createAsyncThunk(
   'auth/createNewUser',
   async ({ username, password }, { rejectWithValue }) => {
+    const loadId = notificationService.loading('notifications.authUserLoad');
     try {
       const response = await axios.post(routes.newUser(), {
         username,
@@ -52,23 +62,31 @@ export const createNewUser = createAsyncThunk(
         username: response.data.username,
         token: response.data.token,
       });
+      notificationService.updateLoadingToSuccess(
+        loadId,
+        'notifications.authUserSucces',
+      );
       return {
         username: response.data.username,
         token: response.data.token,
       };
     } catch (error) {
       console.error('Ошибка запроса:', error);
+      notificationService.updateLoadingToError(
+        loadId,
+        'notifications.authUserError',
+      );
       if (error.response) {
         if (error.response.status === 401) {
-          return rejectWithValue('Неверное имя пользователя или пароль');
+          return rejectWithValue('notifications.authUserErrorUsernameAndPass');
         }
         return rejectWithValue(
-          error.response.data?.message || 'Ошибка сервера',
+          error.response.data?.message || 'notifications.serverError',
         );
       } else if (error.request) {
-        return rejectWithValue('Сервер не отвечает');
+        return rejectWithValue('notifications.serverIsNotResponding');
       } else {
-        return rejectWithValue(error.message || 'Ошибка отправки запроса');
+        return rejectWithValue(error.message || 'notifications.fetchError');
       }
     }
   },
@@ -111,7 +129,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, _action) => {
         state.loading = false;
-        state.error = 'Ошибка авторизации';
+        state.error = 'notifications.authUserError';
         state.isAuthorized = false;
       })
 
@@ -128,7 +146,7 @@ const authSlice = createSlice({
       })
       .addCase(createNewUser.rejected, (state, _action) => {
         state.loading = false;
-        state.error = 'Ошибка авторизации';
+        state.error = 'notifications.authUserError';
         state.isAuthorized = false;
       });
   },

@@ -33,7 +33,7 @@ const Chat = () => {
 
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   const channels = useSelector(selectAllChannels);
   const { activeChannel, defaultChannel } = useSelector(
@@ -50,13 +50,7 @@ const Chat = () => {
   const { socket, on, off } = useSocket(user, token);
 
   useEffect(() => {
-    if (!isAuthorized) {
-      navigate('/login');
-    }
-  }, [isAuthorized, navigate]);
-
-  useEffect(() => {
-    if (isAuthorized) {
+    if (isAuthorized && token) {
       dispatch(getChannels(token));
       dispatch(getMessages(token));
     }

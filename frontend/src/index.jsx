@@ -1,11 +1,14 @@
 // init.jsx
 /* eslint-disable functional/no-expression-statement */
-
 import 'bootstrap/dist/css/bootstrap.min.css';
-import i18next from 'i18next';
+import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
+
+import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { I18nextProvider, initReactI18next } from 'react-i18next';
+import { I18nextProvider } from 'react-i18next';
 import { Provider, useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Authorization from './components/Authorization.jsx';
@@ -13,11 +16,12 @@ import Chat from './components/Chat.jsx';
 import Login from './components/Login.jsx';
 import NavScrollExample from './components/Navbar.jsx';
 import NotFound from './components/NotFound.jsx';
-import resources from './locales/index.js';
+import ProtectedRoute from './components/ProtectedRoute';
+import i18n, { i18nReady } from './i18n.js';
 import { restoreAuth } from './slices/auth.js';
 import store from './slices/index.js';
 
-const App = ({ i18n }) => {
+const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -25,46 +29,46 @@ const App = ({ i18n }) => {
   }, [dispatch]);
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <BrowserRouter
-        future={{
-          v7_relativeSplatPath: true,
-          v7_startTransition: true,
-        }}
-      >
-        <NavScrollExample>
-          <Routes>
-            <Route path="*" element={<NotFound />} />
-            <Route path="/" element={<Chat />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Authorization />} />
-          </Routes>
-        </NavScrollExample>
-      </BrowserRouter>
-    </I18nextProvider>
-  );
-};
-
-const init = async () => {
-  const i18n = i18next.createInstance();
-
-  await i18n.use(initReactI18next).init({
-    resources,
-    fallbackLng: 'ru',
-  });
-
-  return (
-    <Provider store={store}>
-      <App i18n={i18n} />
-    </Provider>
+    <BrowserRouter
+      future={{
+        v7_relativeSplatPath: true,
+        v7_startTransition: true,
+      }}
+    >
+      <NavScrollExample>
+        <Routes>
+          <Route path="*" element={<NotFound />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Authorization />} />
+        </Routes>
+      </NavScrollExample>
+    </BrowserRouter>
   );
 };
 
 const app = async () => {
+  await i18nReady;
+
   const root = ReactDOM.createRoot(document.querySelector('#chat'));
-  root.render(await init());
+
+  root.render(
+    <Provider store={store}>
+      <I18nextProvider i18n={i18n}>
+        <MantineProvider>
+          <Notifications position="top-center" zIndex={1000} />
+          <App />
+        </MantineProvider>
+      </I18nextProvider>
+    </Provider>,
+  );
 };
 
 app();
-
-export default init;
