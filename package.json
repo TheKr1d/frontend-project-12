@@ -1,17 +1,9 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "build": "npm run build --prefix frontend",
-    "start": "start-server -s ./frontend/dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build --prefix frontend && mkdir -p build && cp -r frontend/dist/* build/",
+    "start": "npx start-server -s ./build",
     "postinstall": "cd frontend && npm ci"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@hexlet/chat-server": "^2.0.4"
   }
 }
