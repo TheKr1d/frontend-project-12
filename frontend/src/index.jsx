@@ -1,5 +1,7 @@
 // init.jsx
 /* eslint-disable functional/no-expression-statement */
+import './instrument';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -11,6 +13,7 @@ import ReactDOM from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 import { Provider, useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AppErrorBoundary } from './components/AppErrorBoundary.jsx';
 import Authorization from './components/Authorization.jsx';
 import Chat from './components/Chat.jsx';
 import Login from './components/Login.jsx';
@@ -64,7 +67,9 @@ const app = async () => {
       <I18nextProvider i18n={i18n}>
         <MantineProvider>
           <Notifications position="top-center" zIndex={1000} />
-          <App />
+          <AppErrorBoundary>
+            <App />
+          </AppErrorBoundary>
         </MantineProvider>
       </I18nextProvider>
     </Provider>,
