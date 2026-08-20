@@ -19,6 +19,7 @@ export const loginUser = createAsyncThunk(
     const loadId = notificationService.loading('notifications.loginUserLoad');
     try {
       const response = await axios.post(routes.login(), { username, password });
+      console.log('📦 Ответ от бэкенда:', response.data); // 👈 ДОБАВЬТЕ ЭТО
       addToken({
         username: response.data.username,
         token: response.data.token,
