@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
 import { socketConnected, socketDisconnected } from '../slices/socket';
+import { getSocketConfig } from '../utils/socketConfig';
 
 export const useSocket = (user, token) => {
   const dispatch = useDispatch();
@@ -20,20 +21,31 @@ export const useSocket = (user, token) => {
       return;
     }
 
-    const socket = io('/', {
-      transports: ['websocket', 'polling'],
+    // Получаем конфигурацию для сокета
+    const { url, options } = getSocketConfig();
+
+    // Создаем сокет с правильным URL
+    const socket = io(url, {
+      ...options,
+      auth: {
+        token: token, // Передаем токен для авторизации
+      },
+      // Дополнительные опции для надежности
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('✅ Socket connected');
+      console.log('✅ Socket connected to:', url);
       setIsReady(true);
       dispatch(socketConnected());
     });
 
-    socket.on('disconnect', () => {
-      console.log('🔌 Socket disconnected');
+    socket.on('disconnect', (reason) => {
+      console.log('🔌 Socket disconnected:', reason);
       setIsReady(false);
       dispatch(socketDisconnected());
     });
@@ -42,6 +54,12 @@ export const useSocket = (user, token) => {
       console.error('❌ Socket error:', error);
       setIsReady(false);
       dispatch(socketDisconnected());
+    });
+
+    // Обработка ошибок авторизации
+    socket.on('unauthorized', (error) => {
+      console.error('🔒 Socket unauthorized:', error);
+      // Можно обработать перелогин здесь
     });
 
     return () => {
@@ -59,6 +77,8 @@ export const useSocket = (user, token) => {
     emit: (event, data) => {
       if (socketRef.current && isReady) {
         socketRef.current.emit(event, data);
+      } else {
+        console.warn('⚠️ Socket not ready, cannot emit:', event);
       }
     },
     on: (event, handler) => {
