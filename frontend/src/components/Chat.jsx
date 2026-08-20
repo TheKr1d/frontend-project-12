@@ -1,4 +1,5 @@
 import { useFormik } from 'formik';
+import leoP from 'leo-profanity';
 import { useEffect, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -95,7 +96,7 @@ const Chat = () => {
     },
     onSubmit: ({ message }, { resetForm }) => {
       const newMessage = {
-        body: message,
+        body: leoP.clean(message),
         channelId: activeChannelId,
         username: user,
       };
@@ -119,7 +120,7 @@ const Chat = () => {
         ),
     }),
     onSubmit: ({ channelName }, { resetForm, setSubmitting }) => {
-      const newChannel = { name: channelName };
+      const newChannel = { name: leoP.clean(channelName) };
       dispatch(fetchAddChannel({ token, newChannel }));
       setIsAddingChannel(false);
       resetForm();
@@ -147,7 +148,7 @@ const Chat = () => {
         fetchEditChannel({
           token,
           id: thisChannelId,
-          name: values.newChannelName,
+          name: leoP.clean(values.newChannelName),
         }),
       );
       resetForm();
