@@ -2,4 +2,4 @@
 [![Actions Status](https://github.com/TheKr1d/frontend-project-12/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/TheKr1d/frontend-project-12/actions)
 
 ## Website
-[Chat](https://frontend-project-12-7hmj.onrender.com)
+[Chat](https://frontend-project-12-backend.onrender.com)
