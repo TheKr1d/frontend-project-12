@@ -4,8 +4,8 @@ import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
-import { clearError, loginUser } from '../slices/auth';
+import { clearError, loginUser } from '../../slices/auth';
+import { loginSchema } from '../../utils/validationSchemas';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -18,14 +18,7 @@ const Login = () => {
       username: '',
       password: '',
     },
-    validationSchema: Yup.object({
-      username: Yup.string()
-        .min(4, t('validation.min', { count: 4 }))
-        .required(t('validation.required')),
-      password: Yup.string()
-        .min(5, t('validation.min', { count: 5 }))
-        .required(t('validation.required')),
-    }),
+    validationSchema: loginSchema(t),
     onSubmit: (values) => {
       dispatch(loginUser(values));
     },

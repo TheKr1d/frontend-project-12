@@ -4,8 +4,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../slices/auth';
-import { notificationService } from '../utils/notificationService';
+import { logout } from '../../slices/auth';
+import { notificationService } from '../../utils/notificationService';
 
 const NavScrollExample = ({ children }) => {
   const { t } = useTranslation();

@@ -5,7 +5,6 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
 import {
   addChannel,
   edditChannel,
@@ -16,18 +15,22 @@ import {
   removeChannel,
   selectAllChannels,
   setActiveChannel,
-} from '../slices/channels';
+} from '../../slices/channels';
 import {
   addMessage,
   fetchAddMessage,
   getMessages,
   selectAllMessages,
-} from '../slices/messages';
-import { close } from '../slices/modal';
-import { selectIsConnected } from '../slices/socket';
-import { useSocket } from '../utils/useSocket';
-import Channels from './Channels';
-import Messages from './Messages';
+} from '../../slices/messages';
+import { close } from '../../slices/modal';
+import { selectIsConnected } from '../../slices/socket';
+import { useSocket } from '../../utils/useSocket';
+import {
+  channelSchema,
+  renameChannelSchema,
+} from '../../utils/validationSchemas';
+import Channels from '../components/Channels';
+import Messages from '../components/Messages';
 
 const Chat = () => {
   const [isAddingChannel, setIsAddingChannel] = useState(false);
@@ -109,16 +112,7 @@ const Chat = () => {
     initialValues: {
       channelName: '',
     },
-    validationSchema: Yup.object({
-      channelName: Yup.string()
-        .min(3, t('validation.min', { count: 3 }))
-        .max(20, t('validation.max', { count: 20 }))
-        .required(t('validation.required'))
-        .notOneOf(
-          channels.map((ch) => ch.name),
-          t('validation.channelDuplicate'),
-        ),
-    }),
+    validationSchema: channelSchema({ t, channels }),
     onSubmit: ({ channelName }, { resetForm, setSubmitting }) => {
       const newChannel = { name: leoP.clean(channelName) };
       dispatch(fetchAddChannel({ token, newChannel }));
@@ -133,16 +127,7 @@ const Chat = () => {
     initialValues: {
       newChannelName: activeChannel?.name || '',
     },
-    validationSchema: Yup.object({
-      newChannelName: Yup.string()
-        .min(3, t('validation.min', { count: 3 }))
-        .max(20, t('validation.max', { count: 20 }))
-        .required(t('validation.required'))
-        .notOneOf(
-          channels.map((ch) => ch.name),
-          t('validation.channelDuplicate'),
-        ),
-    }),
+    validationSchema: renameChannelSchema({ t, channels }),
     onSubmit: (values, { resetForm }) => {
       dispatch(
         fetchEditChannel({

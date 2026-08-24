@@ -1,8 +1,8 @@
 import { ButtonGroup, Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { setActiveChannel } from '../slices/channels';
-import { setType } from '../slices/modal';
+import { setActiveChannel } from '../../slices/channels';
+import { setType } from '../../slices/modal';
 
 const Channels = ({ channels, activeChannelId }) => {
   const { t } = useTranslation();

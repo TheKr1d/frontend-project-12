@@ -77,7 +77,7 @@ export const createNewUser = createAsyncThunk(
       //console.error('Ошибка запроса:', error);
       notificationService.updateLoadingToError(
         loadId,
-        'notifications.authUserError',
+        i18n.t('notifications.authUserError'),
       );
       if (error.response) {
         if (error.response.status === 401) {
@@ -153,7 +153,7 @@ const authSlice = createSlice({
       })
       .addCase(createNewUser.rejected, (state, _action) => {
         state.loading = false;
-        state.error = 'notifications.authUserError';
+        state.error = i18n.t('notifications.authUserError');
         state.isAuthorized = false;
       });
   },

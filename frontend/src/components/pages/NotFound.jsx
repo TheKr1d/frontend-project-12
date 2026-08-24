@@ -8,11 +8,13 @@ const NotFound = () => {
       <Row>
         <Col>
           <h1 className="display-1 text-muted text-center">404</h1>
-          <p className="text-center text-secondary">{t('fieldErrors.notFound')}</p>
+          <p className="text-center text-secondary">
+            {t('fieldErrors.notFound')}
+          </p>
         </Col>
       </Row>
     </Container>
-  )
+  );
 };
 
 export default NotFound;
